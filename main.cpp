@@ -31,9 +31,9 @@ int main()
 
     while (!stopApplication)
     {
-        char receivedBytes = read(is, &buffer, 1);
+        ssize_t receivedBytes = read(is, &buffer, 1);
 
-        if (receivedBytes != 0)
+        if (receivedBytes > 0)
         {
             putchar(buffer);
             fflush(stdout);
@@ -41,6 +41,26 @@ int main()
             write(ofs0, &buffer, 1);
 
             write(ofs1, &buffer, 1);
+        }
+
+        receivedBytes = read(ofs0, &buffer, 1);
+
+        if (receivedBytes > 0)
+        {
+            putchar(buffer);
+            fflush(stdout);
+
+            write(is, &buffer, 1);
+        }
+
+        receivedBytes = read(ofs1, &buffer, 1);
+
+        if (receivedBytes > 0)
+        {
+            putchar(buffer);
+            fflush(stdout);
+
+            write(is, &buffer, 1);
         }
 
         //usleep(500000);
