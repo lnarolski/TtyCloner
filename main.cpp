@@ -1,73 +1,121 @@
-#include <cstdio>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
+#include <iostream>
 #include <unistd.h>
 #include <fcntl.h>
 #include <termios.h>
+#include <pty.h>
+#include <vector>
+
+enum RuntimeErrors
+{
+    OPENPTY_CANT_CREATE_INTERFACE = 1,
+};
+
+using namespace std;
 
 bool stopApplication = false;
 
 int main()
 {
-    umask(0000);
-    mkfifo("/root/out0", 0777);
-    mkfifo("/root/out1", 0777);
+    int numOfTtyIntrefaces = 2;
 
     char buffer = 0;
 
-    int is = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_NDELAY);
+    int ttyDevice = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_NDELAY);
     struct termios options;
-    tcgetattr(is, &options);
+    tcgetattr(ttyDevice, &options);
     options.c_cflag = B9600 | CS8 | CLOCAL | CREAD;
     options.c_iflag = IGNPAR;
     options.c_oflag = 0;
     options.c_lflag = 0;
-    tcflush(is, TCIFLUSH);
-    tcsetattr(is, TCSANOW, &options);
+    tcflush(ttyDevice, TCIFLUSH);
+    tcsetattr(ttyDevice, TCSANOW, &options);
 
-    int ofs0 = open("/root/out0", O_RDWR | O_NOCTTY | O_NDELAY);
-    int ofs1 = open("/root/out1", O_RDWR | O_NOCTTY | O_NDELAY);
+    int status = 0;
+    vector<int> masterDev, slaveDev;
+
+    for (int i = 0; i < numOfTtyIntrefaces; i++)
+    {
+        int master, slave;
+        status = openpty(&master, &slave, NULL, NULL, NULL);
+        if (status < 0)
+        {
+            for (size_t i = 0; i < masterDev.size(); i++)
+            {
+                close(masterDev[i]);
+                close(slaveDev[i]);
+            }
+
+            perror("Openpty can't create interface: ");
+            exit(OPENPTY_CANT_CREATE_INTERFACE);
+        }
+
+        fcntl(master, F_SETFL, FNDELAY); // Setting non blocking mode to masterDev
+        fcntl(slave, F_SETFL, FNDELAY); // Setting non blocking mode to masterDev
+
+        masterDev.push_back(master);
+        slaveDev.push_back(slave);
+
+        printf("Slave%d name: %s\n", i, ttyname(slaveDev[slaveDev.size() - 1]));
+    }
 
     while (!stopApplication)
     {
-        ssize_t receivedBytes = read(is, &buffer, 1);
+        ssize_t receivedBytes = read(ttyDevice, &buffer, 1);
 
+        /// <summary>
+        /// Read from ttyDevice and write to all masters
+        /// </summary>
+        /// <returns></returns>
         if (receivedBytes > 0)
         {
             putchar(buffer);
             fflush(stdout);
 
-            write(ofs0, &buffer, 1);
-
-            write(ofs1, &buffer, 1);
+            for (size_t i = 0; i < masterDev.size(); i++)
+            {
+                write(masterDev[i], &buffer, 1);
+            }
         }
+        ///
 
-        receivedBytes = read(ofs0, &buffer, 1);
-
-        if (receivedBytes > 0)
+        /// <summary>
+        /// Read from all masters and write to ttyDevice
+        /// </summary>
+        /// <returns></returns>
+        for (size_t i = 0; i < masterDev.size(); i++)
         {
-            putchar(buffer);
-            fflush(stdout);
+            char slaveBuffer[4095];
+            size_t j = 0;
+            receivedBytes = read(masterDev[i], &buffer, 1);
+            while (receivedBytes > 0)
+            {
+                slaveBuffer[j] = buffer;
+                ++j;
 
-            write(is, &buffer, 1);
+                receivedBytes = read(masterDev[i], &buffer, 1);
+            }
+
+            if (j > 0)
+            {
+                for (size_t k = 0; k < j; k++)
+                {
+                    putchar(slaveBuffer[k]);
+                }
+                fflush(stdout);
+
+                write(ttyDevice, &slaveBuffer, j);
+            }
         }
-
-        receivedBytes = read(ofs1, &buffer, 1);
-
-        if (receivedBytes > 0)
-        {
-            putchar(buffer);
-            fflush(stdout);
-
-            write(is, &buffer, 1);
-        }
-
-        //usleep(500000);
+        ///
     }
-    close(ofs0);
-    close(ofs1);
-    close(is);
+
+    for (size_t i = 0; i < masterDev.size(); i++)
+    {
+        close(masterDev[i]);
+        close(slaveDev[i]);
+    }
+
+    close(ttyDevice);
 
     getchar();
     return 0;
