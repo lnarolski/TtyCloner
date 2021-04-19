@@ -80,6 +80,9 @@ for 2 OR 5 interface clones.");
                 close(slaveDev[i]);
             }
 
+            clonedInterfacesFile.close();
+            std::remove("/tmp/ttyCloner.txt");
+
             perror("Openpty can't create interface: ");
             exit(OPENPTY_CANT_CREATE_INTERFACE);
         }
