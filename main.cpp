@@ -4,19 +4,45 @@
 #include <termios.h>
 #include <pty.h>
 #include <vector>
+#include <csignal>
 
 enum RuntimeErrors
 {
     OPENPTY_CANT_CREATE_INTERFACE = 1,
+    TOO_FEW_ARGS = 2,
 };
 
 using namespace std;
 
 bool stopApplication = false;
 
-int main()
+void SignalHandler(int signal)
 {
-    int numOfTtyIntrefaces = 2;
+    stopApplication = true;
+}
+
+int main(int argc, char* argv[])
+{
+    std::signal(SIGABRT, SignalHandler);
+    std::signal(SIGTERM, SignalHandler);
+    std::signal(SIGKILL, SignalHandler);
+    std::signal(SIGSEGV, SignalHandler);
+
+    int numOfTtyIntrefaces;
+
+    if (argc != 2)
+    {
+        printf("You have to set up first startup argument to number of tty interface clones, e.g.:\n\
+./TtyCloner 2\n\
+OR\n\
+./TtyCloner 5\n\
+for 2 OR 5 interface clones.");
+        exit(TOO_FEW_ARGS);
+    }
+    else
+    {
+        numOfTtyIntrefaces = atol(argv[1]);
+    }
 
     char buffer = 0;
 
