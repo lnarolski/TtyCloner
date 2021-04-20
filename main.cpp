@@ -31,6 +31,7 @@ int main(int argc, char* argv[])
 	int numOfTtyIntrefaces;
 	char* clonedTtyInterface;
 	unsigned int baudrate = B9600;
+	useconds_t sleepTime_ms = 200;
 
 	if (argc < 3)
 	{
@@ -50,6 +51,7 @@ for 2 '/dev/ttyS0' with 19200 Bd baudrate OR 5 '/dev/ttyUSB0' with 9600 Bd baudr
 	if (argc == 4)
 	{
 		unsigned int argBaudrate = atol(argv[3]);
+		sleepTime_ms = (useconds_t)((((double)19200.0) / argBaudrate) * 100);
 		switch (argBaudrate)
 		{
 		case 0:
@@ -150,7 +152,7 @@ for 2 '/dev/ttyS0' with 19200 Bd baudrate OR 5 '/dev/ttyUSB0' with 9600 Bd baudr
 		}
 	}
 
-	char buffer = 0;
+	char buffer[4095];
 
 	int ttyDevice = open(clonedTtyInterface, O_RDWR | O_NOCTTY | O_NDELAY);
 	struct termios options;
@@ -205,41 +207,26 @@ for 2 '/dev/ttyS0' with 19200 Bd baudrate OR 5 '/dev/ttyUSB0' with 9600 Bd baudr
 
 	while (!stopApplication)
 	{
-		ssize_t receivedBytes = read(ttyDevice, &buffer, 1);
+		usleep(sleepTime_ms * 1000);
+		ssize_t receivedBytes = read(ttyDevice, &buffer, 4095);
 
-		/// <summary>
 		/// Read from ttyDevice and write to all masters
-		/// </summary>
-		/// <returns></returns>
 		if (receivedBytes > 0)
 		{
 			for (size_t i = 0; i < masterDev.size(); i++)
 			{
-				write(masterDev[i], &buffer, 1);
+				write(masterDev[i], &buffer, receivedBytes);
 			}
 		}
 		///
 
-		/// <summary>
 		/// Read from all masters and write to ttyDevice
-		/// </summary>
-		/// <returns></returns>
 		for (size_t i = 0; i < masterDev.size(); i++)
 		{
-			char slaveBuffer[4095];
-			size_t j = 0;
-			receivedBytes = read(masterDev[i], &buffer, 1);
-			while (receivedBytes > 0 && j < 4095)
+			receivedBytes = read(masterDev[i], &buffer, 4095);
+			if (receivedBytes > 0)
 			{
-				slaveBuffer[j] = buffer;
-				++j;
-
-				receivedBytes = read(masterDev[i], &buffer, 1);
-			}
-
-			if (j > 0)
-			{
-				write(ttyDevice, &slaveBuffer, j);
+				write(ttyDevice, &buffer, receivedBytes);
 			}
 		}
 		///
