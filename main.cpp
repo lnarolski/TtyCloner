@@ -6,6 +6,7 @@
 #include <vector>
 #include <csignal>
 #include <fstream>
+#include "./cxxopts.hpp"
 
 enum RuntimeErrors
 {
@@ -20,6 +21,8 @@ void SignalHandler(int signal)
 {
 	stopApplication = true;
 }
+
+cxxopts::Options options("TtyCloner", "Clone tty device to few pseudo ttys without worrying about blocking cloned device");
 
 int main(int argc, char* argv[])
 {
