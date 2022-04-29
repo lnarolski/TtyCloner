@@ -17,6 +17,7 @@ enum RuntimeErrors
 	CANT_CREATE_TTYCLONER_TMP_FILE = 3,
 	UNSUPPORTED_BAUDRATE = 4,
 	REMOVE_TMP_FILE_ERROR = 5,
+	OPENTTY_CANT_OPEN_INTERFACE = 6,
 };
 
 bool stopApplication = false;
@@ -62,12 +63,13 @@ int main(int argc, char* argv[])
 	int numOfTtyIntrefaces;
 	const char* clonedTtyInterface;
 	unsigned int baudrate;
+	unsigned int argBaudrate;
 	useconds_t sleepTime_ms = 200;
 
 	numOfTtyIntrefaces = result["number"].as<int>();
 	clonedTtyInterface = result["interface"].as<std::string>().c_str();
+	argBaudrate = result["baudrate"].as<int>();
 
-	unsigned int argBaudrate = atol(argv[3]);
 	sleepTime_ms = (useconds_t)((((double)19200.0) / argBaudrate) * 100);
 	switch (argBaudrate)
 	{
@@ -172,6 +174,12 @@ int main(int argc, char* argv[])
 	char buffer[4095];
 
 	int ttyDevice = open(clonedTtyInterface, O_RDWR | O_NOCTTY | O_NDELAY);
+
+	if (ttyDevice == -1)
+	{
+		return OPENTTY_CANT_OPEN_INTERFACE;
+	}
+
 	struct termios options;
 	tcgetattr(ttyDevice, &options);
 	options.c_cflag = baudrate | CS8 | CLOCAL | CREAD;
