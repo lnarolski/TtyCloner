@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
 		("b,baudrate", "Set baudrate", cxxopts::value<int>() -> default_value("9600"))
 		("n,number", "Number of new pty interfaces", cxxopts::value<int>())
 		("i,interface", "Tty interface to clone", cxxopts::value<std::string>())
-		("f,file", "Create file /tmp/ttyCloner.txt with list of created pty interfaces")
+		("f,file", "Create file /tmp/TtyCloner.txt with list of created pty interfaces")
 		("h,help", "Show this help")
 	;
 
@@ -195,7 +195,7 @@ int main(int argc, char* argv[])
 	std::ofstream clonedInterfacesFile;
 	if (result.count("file"))
 	{
-		clonedInterfacesFile.open("/tmp/ttyCloner.txt");
+		clonedInterfacesFile.open("/tmp/TtyCloner.txt");
 
 		if (!clonedInterfacesFile.good())
 		{
@@ -219,7 +219,7 @@ int main(int argc, char* argv[])
 			if (result.count("file"))
 			{
 				clonedInterfacesFile.close();
-				std::remove("/tmp/ttyCloner.txt");
+				std::remove("/tmp/TtyCloner.txt");
 			}
 
 			perror("Openpty can't create interface: ");
@@ -276,8 +276,12 @@ int main(int argc, char* argv[])
 	close(ttyDevice);
 
 	if (result.count("file"))
-		if (std::remove("/tmp/ttyCloner.txt"));
+	{
+		if (std::remove("/tmp/TtyCloner.txt"))
+		{
 			return REMOVE_TMP_FILE_ERROR;
+		}
+	}
 
 	return 0;
 }
