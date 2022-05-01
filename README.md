@@ -11,7 +11,7 @@ Clone tty device to few pseudo ttys without worrying about blocking cloned devic
 
 # General info
 
-You should run this application with root permissions or give permissions to needed devices/directories.
+You should run this application with root permissions or give access permissions to needed devices/directories.
 
 # Example diagram
 
