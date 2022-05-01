@@ -5,7 +5,7 @@ Clone tty device to few pseudo ttys without worrying about blocking cloned devic
 
 * [General info](#general-info)
 * [Diagram](#diagram)
-* [Compilation](#compilation)
+* [Compilation/Installation](#compilation/installation)
 * [Example](#example)
 
 # General info
@@ -16,9 +16,9 @@ TODO
 
 TODO
 
-# Compilation
+# Compilation/Installation
 
-TODO
+
 
 # Example
 

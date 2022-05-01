@@ -338,3 +338,8 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/build/TtyCloner
+/build/Makefile
+/build/cmake_install.cmake
+/build/CMakeFiles
+/build/CMakeCache.txt
