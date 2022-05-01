@@ -1,6 +1,7 @@
 
+
 # TtyCloner
-Clone tty device to few pseudo ttys without worrying about blocking cloned device
+Clone tty device to few pseudo ttys without worrying about blocking cloned device.
 
 # Table of contents
 
@@ -11,7 +12,20 @@ Clone tty device to few pseudo ttys without worrying about blocking cloned devic
 
 # General info
 
-You should run this application with root permissions or give access permissions to needed devices/directories.
+You should run this application with root permissions or give permissions to needed devices/directories.
+Console arguments:
+
+    debian@debian10:~/TtyCloner/build$ ./TtyCloner
+    Clone tty device to few pseudo ttys without worrying about blocking cloned device
+    Usage:
+      TtyCloner [OPTION...]
+    
+      -b, --baudrate arg   Set baudrate (default: 9600)
+      -n, --number arg     Number of new pty interfaces
+      -i, --interface arg  Tty interface to clone
+      -f, --file           Create file /tmp/TtyCloner.txt with list of created
+                           pty interfaces
+      -h, --help           Show this help
 
 # Example diagram
 
@@ -34,4 +48,7 @@ After compilation use TtyCloner binary file. You can also open and compile this 
 
 # Example of use
 
-TODO
+<p align="center">
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=XCdNl2k3JyM" target="_blank"><img src="https://img.youtube.com/vi/XCdNl2k3JyM/0.jpg" 
+alt="YouTube video" border="10" /></a>
+</p>
