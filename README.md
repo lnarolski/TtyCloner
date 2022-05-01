@@ -15,7 +15,7 @@ You should run this application with root permissions or give permissions to nee
 
 # Example diagram
 
-TODO
+![Example diagram](https://raw.githubusercontent.com/lnarolski/TtyCloner/master/ExampleDiagram.png)
 
 # Build
 
