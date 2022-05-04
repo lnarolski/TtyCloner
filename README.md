@@ -9,6 +9,7 @@ Clone tty device to few pseudo ttys without worrying about blocking cloned devic
 * [Example diagram](#example-diagram)
 * [Build](#build)
 * [Example of use](#example-of-use)
+* [TODO](#todo)
 
 # General info
 
@@ -52,3 +53,6 @@ After compilation use TtyCloner binary file. You can also open and compile this 
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=XCdNl2k3JyM" target="_blank"><img src="https://img.youtube.com/vi/XCdNl2k3JyM/0.jpg" 
 alt="YouTube video" border="10" /></a>
 </p>
+
+# TODO
+- Add list of created pty interfaces to shm
