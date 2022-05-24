@@ -56,3 +56,4 @@ alt="YouTube video" border="10" /></a>
 
 # TODO
 - Add list of created pty interfaces to shm
+- Add interrupts
